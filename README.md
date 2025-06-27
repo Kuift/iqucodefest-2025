@@ -74,3 +74,17 @@ automatically using NetworkX's spring layout.
 
 You now have all the tools and resources needed to participate in the hackathon.
 Good luck and have fun exploring quantum computing!
+
+## Browser Version
+
+A simplified HTML5 rewrite lives in the `web_version/` folder. To try it locally, run:
+
+```bash
+python -m http.server 8000
+```
+
+and open `http://localhost:8000/web_version/` in your browser.
+
+To publish on itch.io, zip the contents of `web_version/` (make sure `index.html` sits at the root of the archive) and upload the zip as an HTML5 game.
+
+See [`web_version/README.md`](web_version/README.md) for more details.

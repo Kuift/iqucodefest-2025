@@ -64,10 +64,9 @@ class GameScene(Scene):
         self.font = pygame.font.SysFont(None, 28)
         self.big  = pygame.font.SysFont(None, 42)
 
-        # background image for the board
-        self.background = pygame.image.load(
-            "resources/boardgame_background.png"
-        ).convert_alpha()
+        # plain background surface for the board
+        self.background = pygame.Surface((WIDTH, HEIGHT))
+        self.background.fill(WHITE)
 
         # button used to roll the dice one at a time
         self.roll_button = Button("Roll", (WIDTH - 80, HEIGHT - 40))
