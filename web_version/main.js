@@ -1,5 +1,32 @@
 const WIDTH=1100, HEIGHT=650;
 const TYPE_COLOR={1:0x3290ff,2:0xff4646,3:0xffc828,4:0xffd200};
+const MAX_TURNS=10;
+
+class TitleScene extends Phaser.Scene{
+  constructor(){super('title');}
+  create(){
+    this.add.text(WIDTH/2, HEIGHT/2-40,'Super Quantum Party',{font:'32px sans-serif',color:'#000'}).setOrigin(0.5);
+    this.add.text(WIDTH/2, HEIGHT/2,'Press SPACE to start',{font:'24px sans-serif',color:'#000'}).setOrigin(0.5);
+    this.input.keyboard.on('keydown-SPACE',()=>this.scene.start('game'));
+  }
+}
+
+class WinnerScene extends Phaser.Scene{
+  constructor(){super('winner');}
+  init(data){this.players=data.players||[];}
+  create(){
+    this.players.sort((a,b)=>b.stars-a.stars);
+    this.add.text(WIDTH/2,80,'Results',{font:'32px sans-serif',color:'#000'}).setOrigin(0.5);
+    let y=150;
+    for(let i=0;i<this.players.length;i++){
+      const p=this.players[i];
+      const txt=`${i+1}. ${p.name} - ${p.stars}*`;
+      this.add.text(WIDTH/2,y+i*30,txt,{font:'20px sans-serif',color:'#000'}).setOrigin(0.5);
+    }
+    this.add.text(WIDTH/2,HEIGHT-40,'Press SPACE to return',{font:'24px sans-serif',color:'#000'}).setOrigin(0.5);
+    this.input.keyboard.on('keydown-SPACE',()=>this.scene.start('title'));
+  }
+}
 class GameScene extends Phaser.Scene{
   constructor(){super('game');}
   preload(){
@@ -15,6 +42,7 @@ class GameScene extends Phaser.Scene{
       {name:'P1',color:0x3c78f0,pos:'0',stars:0},
       {name:'P2',color:0xe23c3c,pos:'0',stars:0}
     ];
+    this.turnsRemaining=MAX_TURNS;
     this.activeIdx=0;
     this.stepsRemaining=0;
     this.pendingRolls=[];
@@ -99,11 +127,19 @@ class GameScene extends Phaser.Scene{
     }
   }
   endMove(){
-    this.moving=false; this.activeIdx=(this.activeIdx+1)%this.players.length;
+    this.moving=false;
+    if(this.activeIdx===this.players.length-1){
+      this.turnsRemaining--;
+      if(this.turnsRemaining<=0){
+        this.scene.start('winner',{players:this.players});
+        return;
+      }
+    }
+    this.activeIdx=(this.activeIdx+1)%this.players.length;
     this.updateHUD();
   }
   updateHUD(){
-    let hud=`Turn: ${this.players[this.activeIdx].name}`;
+    let hud=`Turn: ${this.players[this.activeIdx].name}  |  Turns left: ${this.turnsRemaining}`;
     if(this.pendingRolls.length) hud+=`  |  Roll: ${this.pendingRolls.join('+')}=${this.stepsRemaining}`;
     hud+=`\n${this.players.map(p=>p.name+': '+p.stars+'*').join('  ')}`;
     if(this.awaitingChoice){
@@ -121,5 +157,11 @@ class GameScene extends Phaser.Scene{
     this.drawPlayers();
   }
 }
-const config={type:Phaser.AUTO,width:WIDTH,height:HEIGHT,backgroundColor:'#ffffff',scene:GameScene};
+const config={
+  type:Phaser.AUTO,
+  width:WIDTH,
+  height:HEIGHT,
+  backgroundColor:'#ffffff',
+  scene:[TitleScene,GameScene,WinnerScene]
+};
 new Phaser.Game(config);
